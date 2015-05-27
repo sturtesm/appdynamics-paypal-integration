@@ -4,4 +4,15 @@ apache-tomee-jaxrs-1.6.0/logs/*
 .metadata
 RemoteSystemsTempFiles
 Java_PayPalCheckout/target
+Java_PayPalCheckout/.project
+Java_PayPalCheckout/.classpath
+Java_PayPalCheckout/.settings
 PayPalAuthService/target
+PayPalAuthService/.project
+PayPalAuthService/.classpath
+PayPalAuthService/.settings
+
+.classpath
+.project
+.settings
+
