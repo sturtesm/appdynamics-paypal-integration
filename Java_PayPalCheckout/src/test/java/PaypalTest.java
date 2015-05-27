@@ -33,6 +33,6 @@ public class PaypalTest {
 	
 	@Test
 	public void Test5() {
-		assertNotNull("Test Pass");
+		assertNotNull(null);
 	}
 }
