@@ -58,7 +58,8 @@ public class AccountServlet extends PaypalDemoServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
+		String accountDetails = null;
+		
 		String doAbortParam = req.getParameter("abort");
 		String resetPool = req.getParameter("reset");
 
@@ -74,7 +75,11 @@ public class AccountServlet extends PaypalDemoServlet {
 			}
 			else {
 				String userId = (abort) ? null : "Steve S";
-				callAuthService((doAbortParam != null), null);
+				String authorization = callAuthService((doAbortParam != null), null);
+				
+				/** process the payment request */
+				accountDetails = initiatePayment(authorization);
+				
 			}
 		} catch (InvalidCardException e) {
 			logger.fatal("Handling invalid card format exception");
@@ -93,6 +98,7 @@ public class AccountServlet extends PaypalDemoServlet {
 		PrintWriter writer = resp.getWriter();
 		writer.println(PAGE_HEADER);
 		writer.println("<h2>Account Balance Page</h3>");
+		writer.println(accountDetails);
 		writer.println(PAGE_FOOTER);
 		writer.close();
 	}
