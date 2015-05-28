@@ -43,7 +43,7 @@ import com.appdynamics.sample.rest.client.WebClientPoolHelper;
  * 
  */
 @SuppressWarnings("serial")
-@WebServlet("/accountBalance")
+@WebServlet("/accountHistory")
 public class AccountServlet extends PaypalDemoServlet {
 
 	static String PAGE_HEADER = "<html><head><title>Welcome to Our Online PayPal Store</title></head><body>";
@@ -78,7 +78,7 @@ public class AccountServlet extends PaypalDemoServlet {
 				String authorization = callAuthService((doAbortParam != null), null);
 				
 				/** process the payment request */
-				accountDetails = initiatePayment(authorization);
+				accountDetails = getAccountHistory();
 				
 			}
 		} catch (InvalidCardException e) {
@@ -105,7 +105,7 @@ public class AccountServlet extends PaypalDemoServlet {
 
 
 	/**
-	 * initiate a payment, actually calls a mid-tier service which then calls to paypal.
+	 * Get the account history
 	 * 
 	 * If authToken == null then simulates an error by throwing an InvalidCardFormatException
 	 * 
@@ -113,19 +113,14 @@ public class AccountServlet extends PaypalDemoServlet {
 	 * @return
 	 * @throws InvalidCardException 
 	 */
-	private String initiatePayment(String authToken) throws InvalidCardException {
+	private String getAccountHistory() throws InvalidCardException {
 		String host = "http://localhost:7090";
-		String service = "/service/v1/paypal/payment/";
+		String service = "/service/v1/paypal/payment/history";
 
-		/**
-    	WebClient client = 
-    			clientHelper.getWebClient(host, service, true, 10);
-		 */
-		WebClient client = 
-				WebClient.create("http://localhost:7090").path("/service/v1/paypal/payment/" + authToken);
+		WebClient client = WebClient.create(host).path(service);
 
 		if (client == null) {
-			logger.fatal("Failed to create web client to invoke payment service");
+			logger.fatal("Failed to create web client to invoke payment history service");
 
 			return null;
 		}
@@ -133,10 +128,11 @@ public class AccountServlet extends PaypalDemoServlet {
 			logger.info("Successfully got web client from pool for [ " + host + " : " + service + " ]");
 		}
 
-		/** when we throw the exception we won't put the client back into the pool */
+		/** when we throw the exception we won't put the client back into the pool
 		if (authToken == null) {
 			throw new InvalidCardException ("Invalid Auth Token Exception, Payment Auth Token != null");
 		}
+		*/
 
 		client.type(MediaType.TEXT_PLAIN);
 		client.accept("text/plain", "text/html");
