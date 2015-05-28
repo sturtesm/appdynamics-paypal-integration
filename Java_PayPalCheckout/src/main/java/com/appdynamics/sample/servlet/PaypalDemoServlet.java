@@ -1,5 +1,7 @@
 package com.appdynamics.sample.servlet;
 
+import java.util.Properties;
+
 import javax.servlet.http.HttpServlet;
 
 import org.apache.cxf.jaxrs.client.WebClient;
@@ -33,6 +35,8 @@ public abstract class PaypalDemoServlet extends HttpServlet {
 	 */
 	protected String callAuthService(boolean abort, String userID) throws Exception {
 
+		readServiceProperties();
+		
 		Integer testInt = (abort) ? null : new Integer(10);
 
 		String host = "http://localhost:7090";
@@ -61,6 +65,21 @@ public abstract class PaypalDemoServlet extends HttpServlet {
 		}
 		else {
 			throw new Exception ("Error getting Web Client to generate auth token from " + host + "/" + service);
+		}
+	}
+	
+	private void readServiceProperties() {
+		
+		Properties properties = new Properties();
+		
+		try {
+			properties.load(this.getClass().getResourceAsStream("payment-services.properties"));
+			
+			logger.info("Host Name: " + properties.getProperty("payment.service.host"));
+			logger.info("Host Port: " + properties.getProperty("payment.service.port"));
+		}
+		catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 }
