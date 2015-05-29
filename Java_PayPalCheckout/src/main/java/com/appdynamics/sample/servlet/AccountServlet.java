@@ -66,7 +66,7 @@ public class AccountServlet extends PaypalDemoServlet {
 		boolean reset = (resetPool != null && resetPool.trim().length() > 0);
 		boolean abort = (doAbortParam == null || doAbortParam.trim().length() == 0);
 
-		logger.info("Processing payment request, abort == " + abort);
+		logger.info("Processing request for qccount history, abort == " + abort);
 
 		try {
 			
@@ -78,7 +78,7 @@ public class AccountServlet extends PaypalDemoServlet {
 				String authorization = callAuthService((doAbortParam != null), null);
 				
 				/** process the payment request */
-				accountDetails = getAccountHistory();
+				accountDetails = getAccountHistory(authorization);
 				
 			}
 		} catch (InvalidCardException e) {
@@ -108,14 +108,15 @@ public class AccountServlet extends PaypalDemoServlet {
 	 * Get the account history
 	 * 
 	 * If authToken == null then simulates an error by throwing an InvalidCardFormatException
+	 * @param authorization 
 	 * 
 	 * @param authToken
 	 * @return
 	 * @throws InvalidCardException 
 	 */
-	private String getAccountHistory() throws InvalidCardException {
+	private String getAccountHistory(String authorization) throws InvalidCardException {
 		String host = "http://localhost:7090";
-		String service = "/service/v1/paypal/payment/history";
+		String service = "/service/v1/paypal/payment/history/" + authorization;
 
 		WebClient client = WebClient.create(host).path(service);
 
