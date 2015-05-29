@@ -11,7 +11,7 @@
 <meta name="description" content="">
 <meta name="author" content="">
 <title>PayPal REST API Samples</title>
-<link rel="icon" href="images/favicon.ico">
+<link rel="icon" href="img/favicon.ico">
 
 <link rel="stylesheet"
 	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
