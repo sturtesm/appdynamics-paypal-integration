@@ -123,7 +123,8 @@ public class CheckoutServlet extends PaypalDemoServlet {
     			clientHelper.getWebClient(host, service, true, 10);
 		 */
 		WebClient client = 
-				WebClient.create("http://localhost:7090").path("/service/v1/paypal/payment/" + authToken);
+				WebClient.create("http://localhost:7090").path(
+						"/service/v1/paypal/payment/credit/create/" + authToken);
 
 		if (client == null) {
 			logger.fatal("Failed to create web client to invoke payment service");
