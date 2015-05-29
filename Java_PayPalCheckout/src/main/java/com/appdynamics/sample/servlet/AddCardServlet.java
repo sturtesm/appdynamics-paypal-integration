@@ -116,7 +116,8 @@ public class AddCardServlet extends PaypalDemoServlet {
 	 */
 	private String addCard(String authToken) throws InvalidCardException {
 		String host = "http://localhost:7090";
-		String service = "/service/v1/paypal/card/credit/create/authToken/visa/4111111111111111";
+		String service = "/service/v1/paypal/card/credit/create/" + 
+				authToken + "/visa/4111111111111111";
 
 		/**
     	WebClient client = 
