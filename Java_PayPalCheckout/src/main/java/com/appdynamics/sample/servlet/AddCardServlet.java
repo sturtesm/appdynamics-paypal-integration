@@ -43,7 +43,7 @@ import com.appdynamics.sample.rest.client.WebClientPoolHelper;
  * 
  */
 @SuppressWarnings("serial")
-@WebServlet("/checkout")
+@WebServlet("/addcard")
 public class AddCardServlet extends PaypalDemoServlet {
 
 	static String PAGE_HEADER = "<html><head><title>Welcome to Our Online PayPal Store</title></head><body>";
@@ -59,7 +59,7 @@ public class AddCardServlet extends PaypalDemoServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String authToken = null;
-		String paymentInfo = null;
+		String cardInfo = null;
 
 		String doAbortParam = req.getParameter("abort");
 		String resetPool = req.getParameter("reset");
@@ -78,7 +78,7 @@ public class AddCardServlet extends PaypalDemoServlet {
 				String userID = (abort) ? null : "Mr. Rogers";
 				authToken = callAuthService((doAbortParam != null), userID);
 
-				paymentInfo = initiatePayment(authToken);
+				cardInfo = addCard(authToken);
 			}
 		} catch (InvalidCardException e) {
 			logger.fatal("Handling invalid card format exception");
@@ -99,14 +99,14 @@ public class AddCardServlet extends PaypalDemoServlet {
 		writer.println("<h2>PayPal Response</h2>");
 		writer.println("Successfully submitted payment...</p>");
 		writer.println("<b>Athentication Token:</b>  " + authToken + "</p>");
-		writer.println("<b>Payment Authorization ID:</b>"  + paymentInfo);
+		writer.println("<b>Payment Authorization ID:</b>"  + cardInfo);
 		writer.println(PAGE_FOOTER);
 		writer.close();
 	}
 
 
 	/**
-	 * initiate a payment, actually calls a mid-tier service which then calls to paypal.
+	 * adds a new credit card, actually calls a mid-tier service which then calls to paypal.
 	 * 
 	 * If authToken == null then simulates an error by throwing an InvalidCardFormatException
 	 * 
@@ -114,17 +114,16 @@ public class AddCardServlet extends PaypalDemoServlet {
 	 * @return
 	 * @throws InvalidCardException 
 	 */
-	private String initiatePayment(String authToken) throws InvalidCardException {
+	private String addCard(String authToken) throws InvalidCardException {
 		String host = "http://localhost:7090";
-		String service = "/service/v1/paypal/payment/";
+		String service = "/service/v1/paypal/card/credit/create/authToken/visa/4111111111111111";
 
 		/**
     	WebClient client = 
     			clientHelper.getWebClient(host, service, true, 10);
 		 */
-		WebClient client = 
-				WebClient.create("http://localhost:7090").path(
-						"/service/v1/paypal/payment/credit/create/" + authToken);
+		WebClient client = 	
+				WebClient.create(host).path(service);
 
 		if (client == null) {
 			logger.fatal("Failed to create web client to invoke payment service");
@@ -133,11 +132,6 @@ public class AddCardServlet extends PaypalDemoServlet {
 		}
 		else {
 			logger.info("Successfully got web client from pool for [ " + host + " : " + service + " ]");
-		}
-
-		/** when we throw the exception we won't put the client back into the pool */
-		if (authToken == null) {
-			throw new InvalidCardException ("Invalid Auth Token Exception, Payment Auth Token != null");
 		}
 
 		client.type(MediaType.TEXT_PLAIN);
