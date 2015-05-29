@@ -11,6 +11,11 @@ import com.appdynamics.sample.rest.client.WebClientPoolHelper;
 
 public abstract class PaypalDemoServlet extends HttpServlet {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	protected WebClientPoolHelper clientHelper = null;
 
 	Logger logger = Logger.getLogger(PaypalDemoServlet.class);

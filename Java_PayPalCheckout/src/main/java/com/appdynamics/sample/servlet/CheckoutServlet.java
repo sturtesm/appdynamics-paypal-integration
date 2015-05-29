@@ -31,6 +31,7 @@ import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.log4j.Logger;
 
 import com.appdynamics.sample.rest.client.WebClientPoolHelper;
+import com.appdynamics.sample.util.ResultPrinter;
 
 /**
  * <p>
@@ -93,15 +94,10 @@ public class CheckoutServlet extends PaypalDemoServlet {
 
 		logger.info("Successfully processed payment request");
 
-		resp.setContentType("text/html");
-		PrintWriter writer = resp.getWriter();
-		writer.println(PAGE_HEADER);
-		writer.println("<h2>PayPal Response</h2>");
-		writer.println("Successfully submitted payment...</p>");
-		writer.println("<b>Athentication Token:</b>  " + authToken + "</p>");
-		writer.println("<b>Payment Authorization ID:</b>"  + paymentInfo);
-		writer.println(PAGE_FOOTER);
-		writer.close();
+		ResultPrinter.addResult(req, resp, "Credit Card Payment", 
+				"Auth Token (paymentInfo)", paymentInfo, null);
+		
+		req.getRequestDispatcher("jsp/response.jsp").forward(req, resp);
 	}
 
 

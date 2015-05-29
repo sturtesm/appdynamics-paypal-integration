@@ -31,6 +31,7 @@ import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.log4j.Logger;
 
 import com.appdynamics.sample.rest.client.WebClientPoolHelper;
+import com.appdynamics.sample.util.ResultPrinter;
 
 /**
  * <p>
@@ -66,7 +67,7 @@ public class AccountServlet extends PaypalDemoServlet {
 		boolean reset = (resetPool != null && resetPool.trim().length() > 0);
 		boolean abort = (doAbortParam == null || doAbortParam.trim().length() == 0);
 
-		logger.info("Processing request for qccount history, abort == " + abort);
+		logger.info("Processing request for account history, abort == " + abort);
 
 		try {
 			
@@ -94,13 +95,11 @@ public class AccountServlet extends PaypalDemoServlet {
 
 		logger.info("Successfully processed payment request");
 
-		resp.setContentType("text/html");
-		PrintWriter writer = resp.getWriter();
-		writer.println(PAGE_HEADER);
-		writer.println("<h2>Account Balance Page</h3>");
-		writer.println(accountDetails);
-		writer.println(PAGE_FOOTER);
-		writer.close();
+		ResultPrinter.addResult(req, resp, "Account History", 
+				"History Length - Last 10 Payments", accountDetails, null);
+		
+		req.getRequestDispatcher("jsp/response.jsp").forward(req, resp);
+		
 	}
 
 

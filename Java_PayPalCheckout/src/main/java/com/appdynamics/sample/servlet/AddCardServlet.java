@@ -17,12 +17,9 @@
 package com.appdynamics.sample.servlet;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.logging.Level;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
@@ -30,7 +27,8 @@ import javax.ws.rs.core.MediaType;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.log4j.Logger;
 
-import com.appdynamics.sample.rest.client.WebClientPoolHelper;
+import com.appdynamics.sample.util.ResultPrinter;
+import com.appdynamics.sample.servlet.PaypalDemoServlet;
 
 /**
  * <p>
@@ -93,15 +91,10 @@ public class AddCardServlet extends PaypalDemoServlet {
 
 		logger.info("Successfully processed payment request");
 
-		resp.setContentType("text/html");
-		PrintWriter writer = resp.getWriter();
-		writer.println(PAGE_HEADER);
-		writer.println("<h2>PayPal Response</h2>");
-		writer.println("Successfully submitted payment...</p>");
-		writer.println("<b>Athentication Token:</b>  " + authToken + "</p>");
-		writer.println("<b>Payment Authorization ID:</b>"  + cardInfo);
-		writer.println(PAGE_FOOTER);
-		writer.close();
+		ResultPrinter.addResult(req, resp, "Added Credit Card", 
+				"Visa - Auth Token (" + authToken + ")", cardInfo, null);
+		
+		req.getRequestDispatcher("jsp/response.jsp").forward(req, resp);
 	}
 
 
