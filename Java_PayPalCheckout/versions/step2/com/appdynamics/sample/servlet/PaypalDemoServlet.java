@@ -53,22 +53,26 @@ public abstract class PaypalDemoServlet extends HttpServlet {
 
 		readServiceProperties();
 		
-		Integer testInt = (abort) ? null : new Integer(10);
+		//disable random NPE
+		//Integer testInt = (abort) ? null : new Integer(10);
 
 		String host = "http://localhost:7090";
 		String service = "/service/v1/paypal/auth";
 
+		/**
 		WebClient client = 
 				clientHelper.getWebClient(host, service, true, 10);
+		*/
+		WebClient client = WebClient.create(host).path(service);
 
 		/** 
 		 * if abort == true, then testInt set to NULL and cause a NULL pointer exception which
 		 * forces the the client to NOT be returned back to the pool
-		 */
 		logger.info("Abort == " + abort + ", testInt=" + testInt);
+		*/
 
 		//NPE possibly
-		testInt.compareTo(10);
+		//testInt.compareTo(10);
 
 		if (client != null) {
 			client.accept("text/plain", "text/html");
