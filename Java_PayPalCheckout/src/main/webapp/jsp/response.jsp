@@ -12,7 +12,7 @@
 <meta name="author" content="">
 <title>PayPal REST API Samples</title>
 <link rel="icon" href="img/favicon.ico">
-<script>window['adrum-start-time'] = new Date().getTime();</script><script src="/js/adrum.js"></script>
+<script>window['adrum-start-time'] = new Date().getTime();</script><script src="/paypal-online-store/js/adrum.js"></script>
 <link rel="stylesheet"
 	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 <link
