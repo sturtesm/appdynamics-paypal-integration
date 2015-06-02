@@ -26,8 +26,19 @@ public abstract class PaypalDemoServlet extends HttpServlet {
 	}
 	
 	public WebClientPoolHelper getClientHelper() {
+		if (clientHelper == null) {
+			clientHelper = WebClientPoolHelper.getInstance();
+		}
 		return clientHelper;
 	}
+	
+	protected void resetAuthWebClientPool() {
+		String host = "http://localhost:7090";
+		String service = "/service/v1/paypal/auth";
+		
+		getClientHelper().resetPool(host, service);
+	}
+	
 
 	/**
 	 * Calls the PayPal auth service to get an authentication token which is used to process a payment
