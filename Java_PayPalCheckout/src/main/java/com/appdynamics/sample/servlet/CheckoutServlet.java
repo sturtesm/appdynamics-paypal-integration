@@ -72,6 +72,8 @@ public class CheckoutServlet extends PaypalDemoServlet {
 
 		try {
 			
+			throw new InvalidCardException("Invalid Card Submitted for Payment");
+			
 			if (reset) {
 				resetAuthWebClientPool();
 			}
@@ -141,5 +143,4 @@ public class CheckoutServlet extends PaypalDemoServlet {
 
 		return client.get(String.class);
 	}
-
 }
