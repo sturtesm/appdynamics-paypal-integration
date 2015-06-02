@@ -51,7 +51,7 @@ public abstract class PaypalDemoServlet extends HttpServlet {
 	 */
 	protected String callAuthService(boolean abort, String userID) throws Exception {
 
-		readServiceProperties();
+		//readServiceProperties();
 		
 		//disable random NPE
 		//Integer testInt = (abort) ? null : new Integer(10);
