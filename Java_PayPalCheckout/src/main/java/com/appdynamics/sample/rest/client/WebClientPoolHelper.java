@@ -111,8 +111,8 @@ public class WebClientPoolHelper {
 		}
 		else if (pool == null)
 		{
-			logger.error("Error returning client to pool, pool for " + hostTargetKey + " == null.");
-			logger.error("Size of pool hash: " + clientPool.size());
+			logger.info("Error returning client to pool, pool for " + hostTargetKey + " == null.");
+			logger.info("Size of pool hash: " + clientPool.size());
 		}
 	}
 
