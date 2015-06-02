@@ -142,12 +142,4 @@ public class CheckoutServlet extends PaypalDemoServlet {
 		return client.get(String.class);
 	}
 
-	
-	private void resetAuthWebClientPool() {
-		String host = "http://localhost:7090";
-		String service = "/service/v1/paypal/auth";
-		
-		clientHelper.resetPool(host, service);
-	}
-	
 }
