@@ -125,9 +125,9 @@ public class WebClientPoolHelper {
 		
 		if (pool != null) {
 			pool.seedPool();
-		}
 		
-		logger.info("Resetting web client for pool " + hostTargetKey + ", pool usage is now [ " + 
+			logger.info("Resetting web client for pool " + hostTargetKey + ", pool usage is now [ " + 
 				pool.getUsageCount() + " / " + pool.getSize() + " ]");
+		}
 	}
 }
