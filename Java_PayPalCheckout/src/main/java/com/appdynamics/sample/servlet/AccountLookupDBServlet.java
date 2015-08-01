@@ -74,8 +74,10 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 			con = ds.getConnection();
 			stmt = con.createStatement();
 
-			rs = stmt.executeQuery("select id from accounts where user like '%amanda%' limit 750");
+			rs = stmt.executeQuery("select id from accounts where user like '%amanda%' limit 100");
 
+			logger.info("got list of accounts, iterating through accounts now...");
+			
 			while(rs.next())
 			{
 				int id = rs.getInt("id");
@@ -93,6 +95,7 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 	
 					accountDetails += userInfo + "\n";
 				}
+				logger.info("done iterating...");
 				
 				rsUser.close();
 				accountStatement.close();
