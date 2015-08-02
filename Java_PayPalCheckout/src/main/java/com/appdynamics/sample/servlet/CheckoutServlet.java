@@ -141,4 +141,5 @@ public class CheckoutServlet extends PaypalDemoServlet {
 
 		return client.get(String.class);
 	}
+
 }

@@ -135,6 +135,10 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 
 			throw new ServletException(e);
 		}
+		finally {
+			stmt.close();
+			con.close();
+		}
 	}
 
 
