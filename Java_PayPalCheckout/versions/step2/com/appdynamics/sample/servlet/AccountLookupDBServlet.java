@@ -17,20 +17,25 @@
 package com.appdynamics.sample.servlet;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.logging.Level;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.log4j.Logger;
 
-import com.appdynamics.sample.rest.client.WebClientPoolHelper;
 import com.appdynamics.sample.util.ResultPrinter;
 
 /**
@@ -44,27 +49,92 @@ import com.appdynamics.sample.util.ResultPrinter;
  * 
  */
 @SuppressWarnings("serial")
-@WebServlet("/accountHistory")
-public class AccountServlet extends PaypalDemoServlet {
+@WebServlet("/accountLookup")
+public class AccountLookupDBServlet extends PaypalDemoServlet {
 
 	static String PAGE_HEADER = "<html><head><title>Welcome to Our Online PayPal Store</title></head><body>";
 
 	static String PAGE_FOOTER = "</body></html>";
 
-	Logger logger = Logger.getLogger(AccountServlet.class);
+	Logger logger = Logger.getLogger(AccountLookupDBServlet.class);
 
-	public AccountServlet() {
+	public AccountLookupDBServlet() {
 		super();
 	}
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		Context ctx = null;
+		Connection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		String accountDetails = "";
+		List<String> list = new ArrayList<String> ();
+		int queryLimit = 25;
 		
-		ResultPrinter.addResult(req, resp, "Account Overview", 
-				"Account Information", "Account Overview Stub", null);
+		list.add("david");
+		list.add("bob");
+		list.add("amanda");
+		list.add("jack");
+		list.add("alex");
+		list.add("ben");
+		list.add("emory");
+		list.add("charlotte");
+		list.add("steve");
+		list.add("mike");
+		list.add("jeanne");
 		
-		req.getRequestDispatcher("jsp/response.jsp").forward(req, resp);
-		
+		String queryName = list.get(new Random().nextInt(list.size()));
+
+		try{
+			ctx = new InitialContext();
+			DataSource ds = (DataSource) ctx.lookup("java:/comp/env/jdbc/MyLocalDB");
+
+			con = ds.getConnection();
+			stmt = con.createStatement();
+
+			rs = stmt.executeQuery("select id from accounts where user like '%" + 
+					queryName + "%' limit " + queryLimit);
+
+			logger.info("got list of accounts, iterating through accounts now...");
+			
+			int iter = 1;
+			while(rs.next())
+			{
+				int id = rs.getInt("id");
+				
+				Statement accountStatement = con.createStatement();
+
+				ResultSet rsUser = accountStatement.executeQuery("select * from accounts where id = " + id);
+				
+				if (rsUser.first()) {
+					String userID = rsUser.getString(1);
+					String user = rsUser.getString(2);
+					String data = rsUser.getString(3);
+					
+					String userInfo = String.format("ID=%s, User=%s, Info=%s", userID, user, data);
+	
+					accountDetails += userInfo + "\n";
+				}
+				logger.info("Got user " + iter + " of " + queryLimit);
+				iter++;
+				
+				rsUser.close();
+				accountStatement.close();
+			}
+
+			logger.info("Done getting account history from MySQL");
+
+			ResultPrinter.addResult(req, resp, "Account Overview", 
+					"Account Information", accountDetails, null);
+
+			req.getRequestDispatcher("jsp/response.jsp").forward(req, resp);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			throw new ServletException(e);
+		}
 	}
 
 
@@ -97,11 +167,12 @@ public class AccountServlet extends PaypalDemoServlet {
 		if (authToken == null) {
 			throw new InvalidCardException ("Invalid Auth Token Exception, Payment Auth Token != null");
 		}
-		*/
+		 */
 
 		client.type(MediaType.TEXT_PLAIN);
 		client.accept("text/plain", "text/html");
 
 		return client.get(String.class);
 	}
+
 }

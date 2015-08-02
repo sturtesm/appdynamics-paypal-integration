@@ -39,53 +39,91 @@ import com.appdynamics.sample.util.ResultPrinter;
  * </p>
  * 
  * <p>
- * The servlet is registered and mapped to /accountBalance
+ * The servlet is registered and mapped to /login
  * </p>
  * 
  */
 @SuppressWarnings("serial")
-@WebServlet("/accountHistory")
-public class AccountServlet extends PaypalDemoServlet {
+@WebServlet("/checkout")
+public class CheckoutServlet extends PaypalDemoServlet {
 
 	static String PAGE_HEADER = "<html><head><title>Welcome to Our Online PayPal Store</title></head><body>";
 
 	static String PAGE_FOOTER = "</body></html>";
 
-	Logger logger = Logger.getLogger(AccountServlet.class);
+	Logger logger = Logger.getLogger(CheckoutServlet.class);
 
-	public AccountServlet() {
+	public CheckoutServlet() {
 		super();
 	}
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		
-		ResultPrinter.addResult(req, resp, "Account Overview", 
-				"Account Information", "Account Overview Stub", null);
+		String authToken = null;
+		String paymentInfo = null;
+
+		String doAbortParam = req.getParameter("abort");
+		String resetPool = req.getParameter("reset");
+
+		boolean reset = (resetPool != null && resetPool.trim().length() > 0);
+		boolean abort = (doAbortParam == null || doAbortParam.trim().length() == 0);
+
+		logger.info("Processing payment request, abort == " + abort);
+
+		try {
+			
+			if (reset) {
+				resetAuthWebClientPool();
+			}
+			else {
+				String userID = (abort) ? null : "Mr. Rogers";
+				authToken = callAuthService((doAbortParam != null), userID);
+
+				paymentInfo = initiatePayment(authToken);
+			}
+		} catch (InvalidCardException e) {
+			logger.fatal("Handling invalid card format exception");
+			e.printStackTrace();
+
+			throw new ServletException(e);
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			throw new ServletException(e);
+		}
+
+		logger.info("Successfully processed payment request");
+
+		ResultPrinter.addResult(req, resp, "Credit Card Payment", 
+				"Auth Token (paymentInfo)", paymentInfo, null);
 		
 		req.getRequestDispatcher("jsp/response.jsp").forward(req, resp);
-		
 	}
 
 
 	/**
-	 * Get the account history
+	 * initiate a payment, actually calls a mid-tier service which then calls to paypal.
 	 * 
 	 * If authToken == null then simulates an error by throwing an InvalidCardFormatException
-	 * @param authorization 
 	 * 
 	 * @param authToken
 	 * @return
 	 * @throws InvalidCardException 
 	 */
-	private String getAccountHistory(String authorization) throws InvalidCardException {
+	private String initiatePayment(String authToken) throws InvalidCardException {
 		String host = "http://localhost:7090";
-		String service = "/service/v1/paypal/payment/history/" + authorization;
+		String service = "/service/v1/paypal/payment/";
 
-		WebClient client = WebClient.create(host).path(service);
+		/**
+    	WebClient client = 
+    			clientHelper.getWebClient(host, service, true, 10);
+		 */
+		WebClient client = 
+				WebClient.create("http://localhost:7090").path(
+						"/service/v1/paypal/payment/credit/create/" + authToken);
 
 		if (client == null) {
-			logger.fatal("Failed to create web client to invoke payment history service");
+			logger.fatal("Failed to create web client to invoke payment service");
 
 			return null;
 		}
@@ -93,15 +131,15 @@ public class AccountServlet extends PaypalDemoServlet {
 			logger.info("Successfully got web client from pool for [ " + host + " : " + service + " ]");
 		}
 
-		/** when we throw the exception we won't put the client back into the pool
+		/** when we throw the exception we won't put the client back into the pool */
 		if (authToken == null) {
 			throw new InvalidCardException ("Invalid Auth Token Exception, Payment Auth Token != null");
 		}
-		*/
 
 		client.type(MediaType.TEXT_PLAIN);
 		client.accept("text/plain", "text/html");
 
 		return client.get(String.class);
 	}
+
 }
