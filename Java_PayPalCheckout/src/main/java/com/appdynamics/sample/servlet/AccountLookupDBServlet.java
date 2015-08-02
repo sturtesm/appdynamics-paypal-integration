@@ -20,6 +20,9 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -66,6 +69,22 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 		Statement stmt = null;
 		ResultSet rs = null;
 		String accountDetails = "";
+		List<String> list = new ArrayList<String> ();
+		int queryLimit = 25;
+		
+		list.add("david");
+		list.add("bob");
+		list.add("amanda");
+		list.add("jack");
+		list.add("alex");
+		list.add("ben");
+		list.add("emory");
+		list.add("charlotte");
+		list.add("steve");
+		list.add("mike");
+		list.add("jeanne");
+		
+		String queryName = list.get(new Random().nextInt(list.size()));
 
 		try{
 			ctx = new InitialContext();
@@ -74,10 +93,12 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 			con = ds.getConnection();
 			stmt = con.createStatement();
 
-			rs = stmt.executeQuery("select id from accounts where user like '%amanda%' limit 100");
+			rs = stmt.executeQuery("select id from accounts where user like '%" + 
+					queryName + "%' limit " + queryLimit);
 
 			logger.info("got list of accounts, iterating through accounts now...");
 			
+			int iter = 1;
 			while(rs.next())
 			{
 				int id = rs.getInt("id");
@@ -95,13 +116,14 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 	
 					accountDetails += userInfo + "\n";
 				}
-				logger.info("done iterating...");
+				logger.info("Got user " + iter + " of " + queryLimit);
+				iter++;
 				
 				rsUser.close();
 				accountStatement.close();
 			}
 
-			logger.info("Attempting to get account history from MySQL");
+			logger.info("Done getting account history from MySQL");
 
 			ResultPrinter.addResult(req, resp, "Account Overview", 
 					"Account Information", accountDetails, null);
