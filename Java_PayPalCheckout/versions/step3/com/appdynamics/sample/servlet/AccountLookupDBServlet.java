@@ -19,6 +19,7 @@ package com.appdynamics.sample.servlet;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -136,8 +137,19 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 			throw new ServletException(e);
 		}
 		finally {
-			stmt.close();
-			con.close();
+			try {
+				stmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			finally {
+				try {
+					con.close();
+				}
+				catch (Exception e) {
+					
+				}
+			}
 		}
 	}
 
