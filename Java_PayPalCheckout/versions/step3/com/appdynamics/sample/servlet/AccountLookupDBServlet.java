@@ -140,6 +140,21 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 
 			throw new ServletException(e);
 		}
+		finally {
+			try {
+				stmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			finally {
+				try {
+					con.close();
+				}
+				catch (Exception e) {
+					
+				}
+			}
+		}
 	}
 
 
