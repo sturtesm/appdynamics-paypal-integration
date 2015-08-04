@@ -17,26 +17,20 @@
 package com.appdynamics.sample.servlet;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.io.PrintWriter;
+import java.util.logging.Level;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.log4j.Logger;
 
+import com.appdynamics.sample.rest.client.WebClientPoolHelper;
 import com.appdynamics.sample.util.ResultPrinter;
 
 /**
@@ -50,96 +44,62 @@ import com.appdynamics.sample.util.ResultPrinter;
  * 
  */
 @SuppressWarnings("serial")
-@WebServlet("/accountLookup")
-public class AccountLookupDBServlet extends PaypalDemoServlet {
+@WebServlet("/accountHistory")
+public class AccountServlet extends PaypalDemoServlet {
 
 	static String PAGE_HEADER = "<html><head><title>Welcome to Our Online PayPal Store</title></head><body>";
 
 	static String PAGE_FOOTER = "</body></html>";
 
-	Logger logger = Logger.getLogger(AccountLookupDBServlet.class);
+	Logger logger = Logger.getLogger(AccountServlet.class);
 
-	public AccountLookupDBServlet() {
+	public AccountServlet() {
 		super();
 	}
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		Context ctx = null;
-		Connection con = null;
-		PreparedStatement stmt = null;
-		String accountDetails = "";
-		List<String> list = new ArrayList<String> ();
-		int queryLimit = 25;
+		String accountDetails = null;
 		
-		list.add("david");
-		list.add("bob");
-		list.add("amanda");
-		list.add("jack");
-		list.add("alex");
-		list.add("ben");
-		list.add("emory");
-		list.add("charlotte");
-		list.add("steve");
-		list.add("mike");
-		list.add("jeanne");
-		
-		String queryName = list.get(new Random().nextInt(list.size()));
+		String doAbortParam = req.getParameter("abort");
+		String resetPool = req.getParameter("reset");
 
-		try{
-			ctx = new InitialContext();
-			DataSource ds = (DataSource) ctx.lookup("java:/comp/env/jdbc/MyLocalDB");
+		boolean reset = (resetPool != null && resetPool.trim().length() > 0);
+		boolean abort = (doAbortParam == null || doAbortParam.trim().length() == 0);
 
-			con = ds.getConnection();
-			stmt = con.prepareStatement("select id from accounts where user like ? limit ?"); 
+		logger.info("Processing request for account history, abort == " + abort);
 
-			stmt.setString(1, "%'" + queryName + "'%");
-			stmt.setInt(2, queryLimit);
+		try {
 			
-			ResultSet rs = stmt.executeQuery();
-			
-			logger.info("got list of accounts, iterating through accounts now...");
-			
-			int iter = 1;
-			
-			PreparedStatement accountStatement = 
-					con.prepareStatement("select * from accounts where id = ?");
-			
-			while(rs.next())
-			{
-				int id = rs.getInt("id");
-				
-				accountStatement.setInt(1, id);
-				ResultSet rsUser = accountStatement.executeQuery();
-				
-				if (rsUser.first()) {
-					String userID = rsUser.getString(1);
-					String user = rsUser.getString(2);
-					String data = rsUser.getString(3);
-					
-					String userInfo = String.format("ID=%s, User=%s, Info=%s", userID, user, data);
-	
-					accountDetails += userInfo + "\n";
-				}
-				logger.info("Got user " + iter + " of " + queryLimit);
-				iter++;
-				
-				rsUser.close();
+			if (reset) {
+				resetAuthWebClientPool();
 			}
-			accountStatement.close();
+			else {
+				String userId = (abort) ? null : "Steve S";
+				String authorization = callAuthService((doAbortParam != null), null);
+				
+				/** process the payment request */
+				accountDetails = getAccountHistory(authorization);
+				
+			}
+		} catch (InvalidCardException e) {
+			logger.fatal("Handling invalid card format exception");
+			e.printStackTrace();
 
-			logger.info("Done getting account history from MySQL");
-
-			ResultPrinter.addResult(req, resp, "Account Overview", 
-					"Account Information", accountDetails, null);
-
-			req.getRequestDispatcher("jsp/response.jsp").forward(req, resp);
-
+			throw new ServletException(e);
 		} catch (Exception e) {
 			e.printStackTrace();
 
 			throw new ServletException(e);
 		}
+
+		logger.info("Successfully processed payment request");
+
+		ResultPrinter.addResult(req, resp, "Account History", 
+				"History Length - Last 10 Payments", accountDetails, null);
+		
+		req.getRequestDispatcher("jsp/response.jsp").forward(req, resp);
+		
 	}
 
 
@@ -172,7 +132,7 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 		if (authToken == null) {
 			throw new InvalidCardException ("Invalid Auth Token Exception, Payment Auth Token != null");
 		}
-		 */
+		*/
 
 		client.type(MediaType.TEXT_PLAIN);
 		client.accept("text/plain", "text/html");

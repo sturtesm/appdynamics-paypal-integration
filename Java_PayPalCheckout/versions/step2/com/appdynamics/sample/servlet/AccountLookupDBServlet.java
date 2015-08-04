@@ -18,6 +18,7 @@ package com.appdynamics.sample.servlet;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -66,7 +67,7 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		Context ctx = null;
 		Connection con = null;
-		Statement stmt = null;
+		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		String accountDetails = "";
 		List<String> list = new ArrayList<String> ();
@@ -91,21 +92,27 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 			DataSource ds = (DataSource) ctx.lookup("java:/comp/env/jdbc/MyLocalDB");
 
 			con = ds.getConnection();
-			stmt = con.createStatement();
+			stmt = con.prepareStatement("select id from accounts where user like ? limit ?"); 
 
-			rs = stmt.executeQuery("select id from accounts where user like '%" + 
-					queryName + "%' limit " + queryLimit);
+			stmt.setString(1, "%'" + queryName + "'%");
+			stmt.setInt(2, queryLimit);
+			
+			rs = stmt.executeQuery();
 
 			logger.info("got list of accounts, iterating through accounts now...");
 			
 			int iter = 1;
+			
+			PreparedStatement accountStatement = 
+					con.prepareStatement("select * from accounts where id = ?");
+			
 			while(rs.next())
 			{
 				int id = rs.getInt("id");
-				
-				Statement accountStatement = con.createStatement();
 
-				ResultSet rsUser = accountStatement.executeQuery("select * from accounts where id = " + id);
+				accountStatement.setInt(1, id);
+				
+				ResultSet rsUser = accountStatement.executeQuery();
 				
 				if (rsUser.first()) {
 					String userID = rsUser.getString(1);
@@ -120,9 +127,9 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 				iter++;
 				
 				rsUser.close();
-				accountStatement.close();
 			}
-
+			accountStatement.close();
+			
 			logger.info("Done getting account history from MySQL");
 
 			ResultPrinter.addResult(req, resp, "Account Overview", 
