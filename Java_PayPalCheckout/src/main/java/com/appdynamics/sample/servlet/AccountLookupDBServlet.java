@@ -64,10 +64,10 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
+		ResultPrinter.addResult(req, resp, "Account Overview", 
+				"Account Information", "Account Overview Stub", null);
+		
+		req.getRequestDispatcher("jsp/response.jsp").forward(req, resp);
 	}
-
-
-
 
 }
