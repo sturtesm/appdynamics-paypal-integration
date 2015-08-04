@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -141,6 +142,21 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 			e.printStackTrace();
 
 			throw new ServletException(e);
+		}
+		finally {
+			try {
+				stmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			finally {
+				try {
+					con.close();
+				}
+				catch (Exception e) {
+					
+				}
+			}
 		}
 	}
 
