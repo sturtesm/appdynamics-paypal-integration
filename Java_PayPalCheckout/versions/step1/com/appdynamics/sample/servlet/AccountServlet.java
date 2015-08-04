@@ -60,8 +60,10 @@ public class AccountServlet extends PaypalDemoServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
-		ResultPrinter.addResult(req, resp, "Account Overview", 
-				"Account Information", "Account Overview Stub", null);
+		logger.info("Got Request for Account History");
+		
+		ResultPrinter.addResult(req, resp, "Account History", 
+				"Account History", "Account History Stub", null);
 		
 		req.getRequestDispatcher("jsp/response.jsp").forward(req, resp);
 		

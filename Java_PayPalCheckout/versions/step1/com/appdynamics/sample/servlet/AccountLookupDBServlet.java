@@ -64,6 +64,8 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		logger.info("Got Request for Account Profile Overview");
+		
 		ResultPrinter.addResult(req, resp, "Account Overview", 
 				"Account Information", "Account Overview Stub", null);
 		
