@@ -110,6 +110,9 @@ public class CheckoutServlet extends PaypalDemoServlet {
 		PaymentCard paymentDetails = getPaymentDetails();
 		
 		if (paymentDetails.getCardType().equalsIgnoreCase("discover")) {
+			logger.info("Injecting InvalidCardException for " + 
+					paymentDetails.getCardType() + " Card");
+			
 			throw new InvalidCardException("Error processing payment request, we don't take Discover yet!");
 		}
 		else {
