@@ -112,6 +112,10 @@ public class CheckoutServlet extends PaypalDemoServlet {
 		if (paymentDetails.getCardType().equalsIgnoreCase("discover")) {
 			throw new InvalidCardException("Error processing payment request, we don't take Discover yet!");
 		}
+		else {
+			logger.info("Successfully initiating payment for " + 
+					paymentDetails.getCardType() + " Card");
+		}
 		
 		String host = "http://localhost:7090";
 		String service = "/service/v1/paypal/payment/";
