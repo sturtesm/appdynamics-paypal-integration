@@ -10,7 +10,16 @@ public class PaymentCardInfo {
 		private String cardNumber = null;
 		private String cardType = null;
 		private String cardCity = null;
+		private int amount = 0;
 		
+		public int getAmount() {
+			return amount;
+		}
+
+		public void setAmount(int amount) {
+			this.amount = amount;
+		}
+
 		public String getCardNumber() {
 			return cardNumber;
 		}
@@ -39,6 +48,7 @@ public class PaymentCardInfo {
 			this.cardNumber = number;
 			this.cardType = type;
 			this.cardCity = city;
+			this.amount = new Random().nextInt(500) + 500;
 		}
 	}
 
