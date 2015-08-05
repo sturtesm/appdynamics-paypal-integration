@@ -17,6 +17,7 @@
 package com.appdynamics.sample.servlet;
 
 import java.io.IOException;
+
 import java.io.PrintWriter;
 import java.util.logging.Level;
 
@@ -31,6 +32,8 @@ import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.log4j.Logger;
 
 import com.appdynamics.sample.rest.client.WebClientPoolHelper;
+import com.appdynamics.sample.servlet.PaymentCardInfo;
+import com.appdynamics.sample.servlet.PaymentCardInfo.PaymentCard;
 import com.appdynamics.sample.util.ResultPrinter;
 
 /**
@@ -59,9 +62,16 @@ public class CheckoutServlet extends PaypalDemoServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		
+		getPaymentDetails();
+		
 		ResultPrinter.addResult(req, resp, "Credit Card Payment", 
 				"Stub", "Credit Card Payment Stub", null);
 		
 		req.getRequestDispatcher("jsp/response.jsp").forward(req, resp);
+	}
+	
+	private PaymentCard getPaymentDetails() {
+		return PaymentCardInfo.instance().getCard();
 	}
 }

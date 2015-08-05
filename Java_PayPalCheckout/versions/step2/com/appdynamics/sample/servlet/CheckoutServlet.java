@@ -31,6 +31,8 @@ import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.log4j.Logger;
 
 import com.appdynamics.sample.rest.client.WebClientPoolHelper;
+import com.appdynamics.sample.servlet.PaymentCardInfo;
+import com.appdynamics.sample.servlet.PaymentCardInfo.PaymentCard;
 import com.appdynamics.sample.util.ResultPrinter;
 
 /**
@@ -71,6 +73,8 @@ public class CheckoutServlet extends PaypalDemoServlet {
 		logger.info("Processing payment request, abort == " + abort);
 
 		try {
+			
+			getPaymentDetails();
 			
 			if (reset) {
 				resetAuthWebClientPool();
@@ -142,4 +146,7 @@ public class CheckoutServlet extends PaypalDemoServlet {
 		return client.get(String.class);
 	}
 
+	private PaymentCard getPaymentDetails() {
+		return PaymentCardInfo.instance().getCard();
+	}
 }

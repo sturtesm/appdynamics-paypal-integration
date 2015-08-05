@@ -70,6 +70,8 @@ public class CheckoutServlet extends PaypalDemoServlet {
 
 		try {
 			
+			getPaymentDetails();
+			
 			if (reset) {
 				resetAuthWebClientPool();
 			}
