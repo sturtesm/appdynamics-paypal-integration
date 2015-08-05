@@ -114,10 +114,6 @@ public class CheckoutServlet extends PaypalDemoServlet {
 		String host = "http://localhost:7090";
 		String service = "/service/v1/paypal/payment/";
 
-		/**
-    	WebClient client = 
-    			clientHelper.getWebClient(host, service, true, 10);
-		 */
 		WebClient client = 
 				WebClient.create("http://localhost:7090").path(
 						"/service/v1/paypal/payment/credit/create/" + authToken);
