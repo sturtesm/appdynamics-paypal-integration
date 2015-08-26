@@ -102,15 +102,17 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 
 			logger.info("got list of accounts, iterating through accounts now...");
 			
+			int iter = 1;
+			
 			PreparedStatement accountStatement = 
 					con.prepareStatement("select * from accounts where id = ?");
 			
-			int iter = 1;
 			while(rs.next())
 			{
 				int id = rs.getInt("id");
-				
+
 				accountStatement.setInt(1, id);
+				
 				ResultSet rsUser = accountStatement.executeQuery();
 				
 				if (rsUser.first()) {
@@ -128,7 +130,7 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 				rsUser.close();
 			}
 			accountStatement.close();
-
+			
 			logger.info("Done getting account history from MySQL");
 
 			ResultPrinter.addResult(req, resp, "Account Overview", 
@@ -141,21 +143,44 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 
 			throw new ServletException(e);
 		}
-		finally {
-			try {
-				stmt.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-			finally {
-				try {
-					con.close();
-				}
-				catch (Exception e) {
-					
-				}
-			}
+	}
+
+
+	/**
+	 * Get the account history
+	 * 
+	 * If authToken == null then simulates an error by throwing an InvalidCardFormatException
+	 * @param authorization 
+	 * 
+	 * @param authToken
+	 * @return
+	 * @throws InvalidCardException 
+	 */
+	private String getAccountHistory(String authorization) throws InvalidCardException {
+		String host = "http://localhost:7090";
+		String service = "/service/v1/paypal/payment/history/" + authorization;
+
+		WebClient client = WebClient.create(host).path(service);
+
+		if (client == null) {
+			logger.fatal("Failed to create web client to invoke payment history service");
+
+			return null;
 		}
+		else {
+			logger.info("Successfully got web client from pool for [ " + host + " : " + service + " ]");
+		}
+
+		/** when we throw the exception we won't put the client back into the pool
+		if (authToken == null) {
+			throw new InvalidCardException ("Invalid Auth Token Exception, Payment Auth Token != null");
+		}
+		 */
+
+		client.type(MediaType.TEXT_PLAIN);
+		client.accept("text/plain", "text/html");
+
+		return client.get(String.class);
 	}
 
 }
