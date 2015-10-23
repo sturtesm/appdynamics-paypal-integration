@@ -21,7 +21,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -69,7 +68,6 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 		Context ctx = null;
 		Connection con = null;
 		PreparedStatement stmt = null;
-		ResultSet rs = null;
 		String accountDetails = "";
 		List<String> list = new ArrayList<String> ();
 		int queryLimit = 25;
@@ -98,8 +96,8 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 			stmt.setString(1, "%'" + queryName + "'%");
 			stmt.setInt(2, queryLimit);
 			
-			rs = stmt.executeQuery();
-
+			ResultSet rs = stmt.executeQuery();
+			
 			logger.info("got list of accounts, iterating through accounts now...");
 			
 			int iter = 1;
@@ -110,9 +108,8 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 			while(rs.next())
 			{
 				int id = rs.getInt("id");
-
-				accountStatement.setInt(1, id);
 				
+				accountStatement.setInt(1, id);
 				ResultSet rsUser = accountStatement.executeQuery();
 				
 				if (rsUser.first()) {
@@ -130,7 +127,7 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 				rsUser.close();
 			}
 			accountStatement.close();
-			
+
 			logger.info("Done getting account history from MySQL");
 
 			ResultPrinter.addResult(req, resp, "Account Overview", 
@@ -142,6 +139,21 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 			e.printStackTrace();
 
 			throw new ServletException(e);
+		}
+		finally {
+			try {
+				stmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			finally {
+				try {
+					con.close();
+				}
+				catch (Exception e) {
+					
+				}
+			}
 		}
 	}
 
