@@ -80,9 +80,8 @@ public class PaymentCardInfo {
 
 		cards = new ArrayList<PaymentCard> ();
 
-		/** in step 4, remove mastercard so we have a 50% failure rate */
 		cards.add(createCard("6011000990139424", "Discover", "Austin"));
-		//cards.add(createCard("5555555555554444", "mastercard", "Houston"));
+		cards.add(createCard("5555555555554444", "MasterCard", "Houston"));
 		cards.add(createCard("4012888888881881", "Visa", "Dallas"));
 
 	}
