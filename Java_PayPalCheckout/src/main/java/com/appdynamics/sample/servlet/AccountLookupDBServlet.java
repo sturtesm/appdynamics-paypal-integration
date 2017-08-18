@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -68,6 +69,7 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 		Context ctx = null;
 		Connection con = null;
 		PreparedStatement stmt = null;
+		ResultSet rs = null;
 		String accountDetails = "";
 		List<String> list = new ArrayList<String> ();
 		int queryLimit = 25;
@@ -96,15 +98,14 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 			stmt.setString(1, "%'" + queryName + "'%");
 			stmt.setInt(2, queryLimit);
 			
-			ResultSet rs = stmt.executeQuery();
-			
+			rs = stmt.executeQuery();
+
 			logger.info("got list of accounts, iterating through accounts now...");
-			
-			int iter = 1;
 			
 			PreparedStatement accountStatement = 
 					con.prepareStatement("select * from accounts where id = ?");
 			
+			int iter = 1;
 			while(rs.next())
 			{
 				int id = rs.getInt("id");
@@ -155,44 +156,6 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 				}
 			}
 		}
-	}
-
-
-	/**
-	 * Get the account history
-	 * 
-	 * If authToken == null then simulates an error by throwing an InvalidCardFormatException
-	 * @param authorization 
-	 * 
-	 * @param authToken
-	 * @return
-	 * @throws InvalidCardException 
-	 */
-	private String getAccountHistory(String authorization) throws InvalidCardException {
-		String host = "http://localhost:7090";
-		String service = "/service/v1/paypal/payment/history/" + authorization;
-
-		WebClient client = WebClient.create(host).path(service);
-
-		if (client == null) {
-			logger.fatal("Failed to create web client to invoke payment history service");
-
-			return null;
-		}
-		else {
-			logger.info("Successfully got web client from pool for [ " + host + " : " + service + " ]");
-		}
-
-		/** when we throw the exception we won't put the client back into the pool
-		if (authToken == null) {
-			throw new InvalidCardException ("Invalid Auth Token Exception, Payment Auth Token != null");
-		}
-		 */
-
-		client.type(MediaType.TEXT_PLAIN);
-		client.accept("text/plain", "text/html");
-
-		return client.get(String.class);
 	}
 
 }
