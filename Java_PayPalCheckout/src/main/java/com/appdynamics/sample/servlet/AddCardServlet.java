@@ -133,5 +133,4 @@ public class AddCardServlet extends PaypalDemoServlet {
 
 		return client.get(String.class);
 	}
-
 }
