@@ -17,10 +17,12 @@
 package com.appdynamics.sample.servlet;
 
 import java.io.IOException;
-import java.util.Random;
+import java.io.PrintWriter;
+import java.util.logging.Level;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
@@ -28,6 +30,7 @@ import javax.ws.rs.core.MediaType;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.log4j.Logger;
 
+import com.appdynamics.sample.rest.client.WebClientPoolHelper;
 import com.appdynamics.sample.servlet.PaymentCardInfo.PaymentCard;
 import com.appdynamics.sample.util.ResultPrinter;
 
@@ -81,6 +84,11 @@ public class CheckoutServlet extends PaypalDemoServlet {
 
 				paymentInfo = initiatePayment(authToken);
 			}
+		} catch (InvalidCardException e) {
+			logger.fatal("Handling invalid card format exception");
+			e.printStackTrace();
+
+			throw new ServletException(e);
 		} catch (Exception e) {
 			e.printStackTrace();
 
@@ -106,20 +114,13 @@ public class CheckoutServlet extends PaypalDemoServlet {
 	 * @throws InvalidCardException 
 	 */
 	private String initiatePayment(String authToken) throws InvalidCardException {
-		
-		PaymentCard paymentDetails = getPaymentDetails();
-		
-		if (paymentDetails.getCardType().equalsIgnoreCase("discover")) {
-			throw new InvalidCardException("Error processing payment request, we don't take Discover yet!");
-		}
-		else {
-			logger.info("Successfully initiating payment for " + 
-					paymentDetails.getCardType() + " Card");
-		}
-		
 		String host = "http://localhost:7090";
 		String service = "/service/v1/paypal/payment/";
 
+		/**
+    	WebClient client = 
+    			clientHelper.getWebClient(host, service, true, 10);
+		 */
 		WebClient client = 
 				WebClient.create("http://localhost:7090").path(
 						"/service/v1/paypal/payment/credit/create/" + authToken);
@@ -143,7 +144,7 @@ public class CheckoutServlet extends PaypalDemoServlet {
 
 		return client.get(String.class);
 	}
-
+	
 	private PaymentCard getPaymentDetails() {
 		return PaymentCardInfo.instance().getCard();
 	}
