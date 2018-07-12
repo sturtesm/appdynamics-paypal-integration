@@ -59,11 +59,44 @@ public class AccountServlet extends PaypalDemoServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		String accountDetails = null;
 		
-		logger.info("Got Request for Account History");
-		
+		String doAbortParam = req.getParameter("abort");
+		String resetPool = req.getParameter("reset");
+
+		boolean reset = (resetPool != null && resetPool.trim().length() > 0);
+		boolean abort = (doAbortParam == null || doAbortParam.trim().length() == 0);
+
+		logger.info("Processing request for account history, abort == " + abort);
+
+		try {
+			
+			if (reset) {
+				resetAuthWebClientPool();
+			}
+			else {
+				String userId = (abort) ? null : "Steve S";
+				String authorization = callAuthService((doAbortParam != null), null);
+				
+				/** process the payment request */
+				accountDetails = getAccountHistory(authorization);
+				
+			}
+		} catch (InvalidCardException e) {
+			logger.fatal("Handling invalid card format exception");
+			e.printStackTrace();
+
+			throw new ServletException(e);
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			throw new ServletException(e);
+		}
+
+		logger.info("Successfully processed payment request");
+
 		ResultPrinter.addResult(req, resp, "Account History", 
-				"Account History", "Account History Stub", null);
+				"History Length - Last 10 Payments", accountDetails, null);
 		
 		req.getRequestDispatcher("jsp/response.jsp").forward(req, resp);
 		
@@ -106,4 +139,5 @@ public class AccountServlet extends PaypalDemoServlet {
 
 		return client.get(String.class);
 	}
+
 }
