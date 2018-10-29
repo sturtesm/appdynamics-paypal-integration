@@ -18,9 +18,7 @@ package com.appdynamics.sample.servlet;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,134 +64,12 @@ public class AccountLookupDBServlet extends PaypalDemoServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		Context ctx = null;
-		Connection con = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		String accountDetails = "";
-		List<String> list = new ArrayList<String> ();
-		int queryLimit = 25;
+		logger.info("Got Request for Account Profile Overview");
 		
-		list.add("david");
-		list.add("bob");
-		list.add("amanda");
-		list.add("jack");
-		list.add("alex");
-		list.add("ben");
-		list.add("emory");
-		list.add("charlotte");
-		list.add("steve");
-		list.add("mike");
-		list.add("jeanne");
+		ResultPrinter.addResult(req, resp, "Account Overview", 
+				"Account Information", "Account Overview Stub", null);
 		
-		String queryName = list.get(new Random().nextInt(list.size()));
-
-		try{
-			ctx = new InitialContext();
-			DataSource ds = (DataSource) ctx.lookup("java:/comp/env/jdbc/MyLocalDB");
-
-			con = ds.getConnection();
-			stmt = con.prepareStatement("select id from accounts where user like ? limit ?"); 
-
-			stmt.setString(1, "%'" + queryName + "'%");
-			stmt.setInt(2, queryLimit);
-			
-			rs = stmt.executeQuery();
-
-			logger.info("got list of accounts, iterating through accounts now...");
-			
-			PreparedStatement accountStatement = 
-					con.prepareStatement("select * from accounts where id = ?");
-			
-			int iter = 1;
-			while(rs.next())
-			{
-				int id = rs.getInt("id");
-				
-				accountStatement.setInt(1, id);
-				ResultSet rsUser = accountStatement.executeQuery();
-				
-				if (rsUser.first()) {
-					String userID = rsUser.getString(1);
-					String user = rsUser.getString(2);
-					String data = rsUser.getString(3);
-					
-					String userInfo = String.format("ID=%s, User=%s, Info=%s", userID, user, data);
-	
-					accountDetails += userInfo + "\n";
-				}
-				logger.info("Got user " + iter + " of " + queryLimit);
-				iter++;
-				
-				rsUser.close();
-			}
-			accountStatement.close();
-
-			logger.info("Done getting account history from MySQL");
-
-			ResultPrinter.addResult(req, resp, "Account Overview", 
-					"Account Information", accountDetails, null);
-
-			req.getRequestDispatcher("jsp/response.jsp").forward(req, resp);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-
-			throw new ServletException(e);
-		}
-		finally {
-			try {
-				stmt.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-			finally {
-				try {
-					con.close();
-				}
-				catch (Exception e) {
-					
-				}
-			}
-		}
-	}
-
-
-	/**
-	 * Get the account history
-	 * 
-	 * If authToken == null then simulates an error by throwing an InvalidCardFormatException
-	 * @param authorization 
-	 * 
-	 * @param authToken
-	 * @return
-	 * @throws InvalidCardException 
-	 */
-	private String getAccountHistory(String authorization) throws InvalidCardException {
-		String host = "http://localhost:7090";
-		String service = "/service/v1/paypal/payment/history/" + authorization;
-
-		WebClient client = WebClient.create(host).path(service);
-
-		if (client == null) {
-			logger.fatal("Failed to create web client to invoke payment history service");
-
-			return null;
-		}
-		else {
-			logger.info("Successfully got web client from pool for [ " + host + " : " + service + " ]");
-		}
-
-		/** when we throw the exception we won't put the client back into the pool
-		if (authToken == null) {
-			throw new InvalidCardException ("Invalid Auth Token Exception, Payment Auth Token != null");
-		}
-		 */
-
-		client.type(MediaType.TEXT_PLAIN);
-		client.accept("text/plain", "text/html");
-
-		return client.get(String.class);
+		req.getRequestDispatcher("jsp/response.jsp").forward(req, resp);
 	}
 
 }
